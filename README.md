@@ -2,7 +2,7 @@
 
 Objektinio programavimo papildoma užduotis.
 
-Ši programa atlieka įvairias operacijas su tekstinėmis failais.
+Ši programa atlieka įvairias operacijas su tekstiniais failais.
 
 ## Aprašymas
 
