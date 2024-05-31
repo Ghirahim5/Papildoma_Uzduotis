@@ -5,86 +5,90 @@ using namespace std;
 string replace_lithuanian_characters(const string& text) {
     string updated_text = text;
 
-	// Pakeiciamos lietuviskos raides
-    updated_text = regex_replace(updated_text, regex("\xc4\x85"), "a"); // ą
-    updated_text = regex_replace(updated_text, regex("\xc4\x8d"), "c"); // č
-    updated_text = regex_replace(updated_text, regex("\xc4\x99"), "e"); // ę
-    updated_text = regex_replace(updated_text, regex("\xc4\x97"), "e"); // ė
-    updated_text = regex_replace(updated_text, regex("\xc5\xa1"), "s"); // š
-    updated_text = regex_replace(updated_text, regex("\xc5\xb3"), "u"); // ų
-    updated_text = regex_replace(updated_text, regex("\xc5\xab"), "u"); // ū
-    updated_text = regex_replace(updated_text, regex("\xc5\xbe"), "z"); // ž
-    updated_text = regex_replace(updated_text, regex("\xc4\xaf"), "i"); // į
-    updated_text = regex_replace(updated_text, regex("\xc4\x84"), "A"); // Ą
-    updated_text = regex_replace(updated_text, regex("\xc4\x8c"), "C"); // Č
-    updated_text = regex_replace(updated_text, regex("\xc4\x98"), "E"); // Ę
-    updated_text = regex_replace(updated_text, regex("\xc4\x96"), "E"); // Ė
-    updated_text = regex_replace(updated_text, regex("\xc5\xa0"), "S"); // Š
-    updated_text = regex_replace(updated_text, regex("\xc5\xb2"), "U"); // Ų
-    updated_text = regex_replace(updated_text, regex("\xc5\xaa"), "U"); // Ū
-    updated_text = regex_replace(updated_text, regex("\xc5\xbd"), "Z"); // Ž
-    updated_text = regex_replace(updated_text, regex("\xc4\xae"), "I"); // Į
+    // Pakeiciamos lietuviskos raides
+    updated_text = regex_replace(updated_text, regex("\xc4\x85"), "a"); // a
+    updated_text = regex_replace(updated_text, regex("\xc4\x8d"), "c"); // c
+    updated_text = regex_replace(updated_text, regex("\xc4\x99"), "e"); // e
+    updated_text = regex_replace(updated_text, regex("\xc4\x97"), "e"); // e
+    updated_text = regex_replace(updated_text, regex("\xc5\xa1"), "s"); // s
+    updated_text = regex_replace(updated_text, regex("\xc5\xb3"), "u"); // u
+    updated_text = regex_replace(updated_text, regex("\xc5\xab"), "u"); // u
+    updated_text = regex_replace(updated_text, regex("\xc5\xbe"), "z"); // z
+    updated_text = regex_replace(updated_text, regex("\xc4\xaf"), "i"); // i
+    updated_text = regex_replace(updated_text, regex("\xc4\x84"), "A"); // A
+    updated_text = regex_replace(updated_text, regex("\xc4\x8c"), "C"); // C
+    updated_text = regex_replace(updated_text, regex("\xc4\x98"), "E"); // E
+    updated_text = regex_replace(updated_text, regex("\xc4\x96"), "E"); // E
+    updated_text = regex_replace(updated_text, regex("\xc5\xa0"), "S"); // S
+    updated_text = regex_replace(updated_text, regex("\xc5\xb2"), "U"); // U
+    updated_text = regex_replace(updated_text, regex("\xc5\xaa"), "U"); // U
+    updated_text = regex_replace(updated_text, regex("\xc5\xbd"), "Z"); // Z
+    updated_text = regex_replace(updated_text, regex("\xc4\xae"), "I"); // I
 
     return updated_text;
 }
 
-void remove_formatting(const string& file_path) {
-
-    // Nuskaitomas failas
-    ifstream infile(file_path);
-    if (!infile.is_open()) {
-        cerr << "Unable to open file: " << file_path << endl;
-        return;
-    }
-
-    stringstream buffer;
-    buffer << infile.rdbuf();
-    string text = buffer.str();
-    infile.close();
-
-	// Istrinami URL
-    regex url_pattern(R"((https?://)?(www\.)?\w+\.\w+)");
-    smatch url_matches;
-    set<string> urls;
-    string::const_iterator searchStart(text.cbegin());
-    while (regex_search(searchStart, text.cend(), url_matches, url_pattern)) {
-        string url = url_matches[0];
-		// Patikrinama ar URL nera skaicius
-        if (regex_match(url, regex(R"(\d+\.\d+)"))) {
-            searchStart = url_matches.suffix().first;
-            continue;
-        }
-        urls.insert(url);
-        searchStart = url_matches.suffix().first;
-    }
-
-	// URL irasymas i faila
-    string urls_file_path = "urls.txt";
-    ofstream urls_file(urls_file_path);
-    if (!urls_file.is_open()) {
-        cerr << "Unable to open file for writing: " << urls_file_path << endl;
-        return;
-    }
-
-    for (const auto& url : urls) {
-        urls_file << url << endl;
-    }
-
-    urls_file.close();
-
+string remove_formatting(const string& text) {
     string updated_text = text;
 
-	// Pakeiciamos lietuviskos raides
+    // Istrinamos nuorodos is teksto ir grazinamas atnaujintas tekstas
+    regex url_pattern(R"((https?://)?(www\.)?\w+\.\w+)");
+    updated_text = regex_replace(updated_text, url_pattern, "");
+
+    // Pakeiciamos lietuviskos raides
     updated_text = replace_lithuanian_characters(updated_text);
 
-	// Atnaujintas tekstas irasomas i faila
-    string new_file_path = "updated_text.txt";
-    ofstream outfile(new_file_path);
-    if (!outfile.is_open()) {
-        cerr << "Unable to open file for writing: " << new_file_path << endl;
-        return;
+    // Pasalinamos santrumpos
+    regex abbreviation_pattern1(R"([A-Za-z]+\.)");
+    smatch match1;
+
+    // Ieskoma sablono
+    while (regex_search(updated_text, match1, abbreviation_pattern1)) {
+        // Pakeiciamas pirmas atitikmuo
+        updated_text.replace(match1.position(), match1.length(), "");
     }
 
-    outfile << updated_text;
-    outfile.close();
+    // Pasalinamos santrumpos (pvz. USA)
+    regex abbreviation_pattern2(R"(\b[A-Z]+\b)");
+    smatch match2;
+
+    while (regex_search(updated_text, match2, abbreviation_pattern2)) {
+        // Pakeiciamas pirmas atitikmuo
+        updated_text.replace(match2.position(), match2.length(), "");
+    }
+
+    // Pasalinamos atskiros didziosios raides (kurios nera sakinio pradzia)
+    for (size_t i = 1; i < updated_text.size(); ++i) {
+        if (isupper(updated_text[i]) && updated_text[i - 1] == ' ' && updated_text[i - 2] != '.' && updated_text[i + 1] == ' ') {
+            updated_text.erase(i, 1);
+            --i;
+        }
+    }
+
+    // Pasalinami matavimo vienetai
+    regex length_measurement_pattern(R"(\b\d+(\.\d+)?\s*(km|m|cm|mm|mi|yd|ft|in)\b)");
+    smatch match3;
+
+    // Ieskoma sablono
+    while (regex_search(updated_text, match3, length_measurement_pattern)) {
+        // Pakeiciamas pirmas atitikmuo
+        updated_text.replace(match3.position(), match3.length(), "");
+    }
+
+    // Pasalinami skyrybos zenklai ir nestandartiniai simboliai
+    updated_text.erase(remove_if(updated_text.begin(), updated_text.end(), [](char c) {
+        return !isalnum(c) && !isspace(c);
+        }), updated_text.end());
+
+    // Pasalinami skliaustai
+    updated_text.erase(remove_if(updated_text.begin(), updated_text.end(), [](char c) {
+        return c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}';
+        }), updated_text.end());
+
+    // Pasalinami skaiciai
+    updated_text.erase(remove_if(updated_text.begin(), updated_text.end(), [](char c) {
+        return isdigit(c);
+        }), updated_text.end());
+
+    return updated_text;
 }

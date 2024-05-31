@@ -8,7 +8,7 @@ unordered_map<string, int> count_words(const string& text) {
     istringstream stream(text);
     string word;
     while (stream >> word) {
-		// Tikrinama ar zodis sudarytas tik is raidziu
+        // Tikrinama ar zodis sudarytas tik is raidziu
         bool isWord = true;
         for (char c : word) {
             if (!isalpha(c)) {
@@ -29,35 +29,68 @@ unordered_map<string, vector<int>> generate_cross_reference(const string& text) 
     istringstream stream(text);
     string line;
     int line_number = 0;
+    // Skaitome eilutes is srauto
     while (getline(stream, line)) {
         ++line_number;
         istringstream line_stream(line);
         string word;
+        // Skaitome zodzius is eilutes
         while (line_stream >> word) {
             if (!word.empty()) {
+                // Irasome zodzio eilutes numeri i zemelapi
                 word_lines[word].push_back(line_number);
             }
         }
     }
+    // Graziname zodziu eiluciu numeriu zemelapi
     return word_lines;
+}
+
+// URL israsymas
+unordered_map<string, int> read_urls(const string& text) {
+    // Naudojame reguliariaja israiska URL suradimui
+    regex url_pattern(R"((https?://)?(www\.)?\w+\.\w+(\.\w+)?)");
+    smatch url_matches;
+    unordered_map<string, int> urls;
+    string::const_iterator searchStart(text.cbegin());
+    // Ieskom URL tekste
+    while (regex_search(searchStart, text.cend(), url_matches, url_pattern)) {
+        string url = url_matches[0];
+        // Tikriname ar URL nera skaicius
+        if (regex_match(url, regex(R"(\d+\.\d+)"))) {
+            searchStart = url_matches.suffix().first;
+            continue;
+        }
+        // Didiname URL pasikartojimu skaiciu
+        ++urls[url];
+        searchStart = url_matches.suffix().first;
+    }
+    // Graziname URL pasikartojimu zemelapi
+    return urls;
 }
 
 // Zodziu skaiciavimo rezultatu irasymas i faila
 void write_word_counts(const unordered_map<string, int>& word_count) {
+    // Atidarome faila irasymui
     ofstream word_count_file("word_counts.txt");
+    // Iteruojame per zodziu skaiciavimo rezultatus
     for (const auto& pair : word_count) {
+        // Irasome tik tuos zodzius, kurie pasikartojo daugiau nei viena karta
         if (pair.second > 1) {
             word_count_file << pair.first << ": " << pair.second << endl;
         }
     }
+    // Uzdaryti faila
     word_count_file.close();
 }
 
-
 // Cross-reference lenteles irasymas i faila
 void write_cross_reference(const unordered_map<string, vector<int>>& word_lines) {
+    // Atidarome faila irasymui
     ofstream cross_reference_file("cross_reference.txt");
+    // Iteruojame per zodziu eiluciu numeriu rezultatus
     for (const auto& pair : word_lines) {
+        // Irasome tik tuos zodzius, kurie pasikartojo daugiau nei viena karta
         if (pair.second.size() > 1) {
             cross_reference_file << pair.first << ": ";
             for (size_t i = 0; i < pair.second.size(); ++i) {
@@ -69,5 +102,27 @@ void write_cross_reference(const unordered_map<string, vector<int>>& word_lines)
             cross_reference_file << endl;
         }
     }
+    // Uzdaryti faila
     cross_reference_file.close();
+}
+
+// URL irasymas i faila
+void write_urls(const unordered_map<string, int>& urls) {
+    // Nurodome failo kelia
+    string urls_file_path = "urls.txt";
+    // Atidarome faila irasymui
+    ofstream urls_file(urls_file_path);
+    // Jei nepavyksta atidaryti failo, isvedame klaidos pranesima
+    if (!urls_file.is_open()) {
+        cerr << "Unable to open file for writing: " << urls_file_path << endl;
+        return;
+    }
+
+    // Iteruojame per URL zemelapi ir irasome URL i faila
+    for (const auto& url : urls) {
+        urls_file << url.first << endl;
+    }
+
+    // Uzdaryti faila
+    urls_file.close();
 }
