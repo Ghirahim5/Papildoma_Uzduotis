@@ -31,7 +31,7 @@ string replace_lithuanian_characters(const string& text) {
 string remove_formatting(const string& text) {
     string updated_text = text;
 
-    // Istrinamos nuorodos is teksto ir grazinamas atnaujintas tekstas
+    // Istrinamos nuorodos is teksto
     regex url_pattern(R"((https?://)?(www\.)?\w+\.\w+)");
     updated_text = regex_replace(updated_text, url_pattern, "");
 

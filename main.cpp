@@ -7,7 +7,8 @@ int main() {
     buffer << infile.rdbuf();
     string text = buffer.str();
 
-    auto urls = read_urls(text);
+    auto tlds = read_tlds("tlds.txt");
+    auto urls = read_urls(text, tlds);
 
     auto updated_text = remove_formatting(text);
 

@@ -22,7 +22,10 @@ unordered_map<string, int> count_words(const string& text);
 unordered_map<string, vector<int>> generate_cross_reference(const string& text);
 
 // Funkcija, kuri nuskaito URL is teksto
-unordered_map<string, int> read_urls(const string& text);
+unordered_map<string, int> read_urls(const string& text, const vector<string>& tlds);
+
+// Funkcija, kuri nuskaito TLD is failo
+vector<string> read_tlds(const string& file_path);
 
 // Funkcija, kuri iraso zodziu pasikartojimus
 void write_word_counts(const unordered_map<string, int>& word_count);

@@ -46,26 +46,45 @@ unordered_map<string, vector<int>> generate_cross_reference(const string& text) 
     return word_lines;
 }
 
-// URL israsymas
-unordered_map<string, int> read_urls(const string& text) {
-    // Naudojame reguliariaja israiska URL suradimui
+// TLD skaitymas is failo
+vector<string> read_tlds(const string& file_path) {
+    vector<string> tlds;
+    ifstream file(file_path);
+    if (file.is_open()) {
+        string tld;
+        while (getline(file, tld)) {
+            tlds.push_back("." + tld);
+        }
+        file.close();
+    }
+    return tlds;
+}
+
+// URL skaitymas is teksto
+unordered_map<string, int> read_urls(const string& text, const vector<string>& tlds) {
     regex url_pattern(R"((https?://)?(www\.)?\w+\.\w+(\.\w+)?)");
     smatch url_matches;
     unordered_map<string, int> urls;
     string::const_iterator searchStart(text.cbegin());
-    // Ieskom URL tekste
     while (regex_search(searchStart, text.cend(), url_matches, url_pattern)) {
         string url = url_matches[0];
-        // Tikriname ar URL nera skaicius
         if (regex_match(url, regex(R"(\d+\.\d+)"))) {
             searchStart = url_matches.suffix().first;
             continue;
         }
-        // Didiname URL pasikartojimu skaiciu
-        ++urls[url];
+		// Tikrinima ar URL turi tinkama TLD
+        bool valid_tld = false;
+        for (const auto& tld : tlds) {
+            if (url.size() >= tld.size() && url.compare(url.size() - tld.size(), tld.size(), tld) == 0) {
+                valid_tld = true;
+                break;
+            }
+        }
+        if (valid_tld) {
+            ++urls[url];
+        }
         searchStart = url_matches.suffix().first;
     }
-    // Graziname URL pasikartojimu zemelapi
     return urls;
 }
 
