@@ -88,6 +88,33 @@ unordered_map<string, int> read_urls(const string& text, const vector<string>& t
     return urls;
 }
 
+
+// Sakiniu turinciu "oro" spausdinimas
+void write_sentences_with_word(const string& text) {
+    // Atidarome faila irasymui
+    ofstream output_file("sentences_with_word.txt");
+    // Jei nepavyksta atidaryti failo, isvedame klaidos pranesima
+    if (!output_file.is_open()) {
+        cerr << "Unable to open file for writing: sentences_with_word.txt" << endl;
+        return;
+    }
+
+    istringstream sentence_stream(text);
+    string sentence;
+    regex word_regex("oro");
+
+    // Ieskoma sakiniu su "oro"
+    while (getline(sentence_stream, sentence, '.')) {
+        if (regex_search(sentence, word_regex)) {
+            // Isvedami sakiniai su "oro" ir gale sakinio pridedamas taskas
+            output_file << sentence << '.' << endl;
+        }
+    }
+
+    // Uzdaryti faila
+    output_file.close();
+}
+
 // Zodziu skaiciavimo rezultatu irasymas i faila
 void write_word_counts(const unordered_map<string, int>& word_count) {
     // Atidarome faila irasymui

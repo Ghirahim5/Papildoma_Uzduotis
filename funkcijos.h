@@ -36,6 +36,9 @@ void write_cross_reference(const unordered_map<string, vector<int>>& word_lines)
 // Funkcija, kuri iraso URL
 void write_urls(const unordered_map<string, int>& urls);
 
+// Funkcija, kuri israso sakinius su "oro"
+void write_sentences_with_word(const string& text);
+
 // Funkcija, kuri pasalina formatavima is teksto
 string remove_formatting(const string& text);
 

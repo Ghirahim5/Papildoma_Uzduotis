@@ -14,7 +14,10 @@ int main() {
 
     // Zodziu skaiciavimas
     auto word_count = count_words(updated_text);
-    auto word_lines = generate_cross_reference(updated_text);    
+    auto word_lines = generate_cross_reference(updated_text);
+
+    // Sakiniu su "oro" isvedimas
+    write_sentences_with_word(text);
 
     // Isvedimas i word_counts.txt
     write_word_counts(word_count);
